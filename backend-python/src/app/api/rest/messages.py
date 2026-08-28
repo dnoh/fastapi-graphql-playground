@@ -1,4 +1,3 @@
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -22,7 +21,7 @@ def create_message(message: MessageCreate, db: Session = Depends(get_db)):
     return db_message
 
 
-@router.get("/", response_model=List[Message])
+@router.get("/", response_model=list[Message])
 def get_messages(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     messages = db.query(MessageModel).offset(skip).limit(limit).all()
     return messages
@@ -36,12 +35,7 @@ def get_message(message_id: UUID, db: Session = Depends(get_db)):
     return message
 
 
-@router.get("/latest/", response_model=List[Message])
+@router.get("/latest/", response_model=list[Message])
 def get_latest_messages(limit: int = 10, db: Session = Depends(get_db)):
-    messages = (
-        db.query(MessageModel)
-        .order_by(MessageModel.created_at.desc())
-        .limit(limit)
-        .all()
-    )
-    return messages 
+    messages = db.query(MessageModel).order_by(MessageModel.created_at.desc()).limit(limit).all()
+    return messages

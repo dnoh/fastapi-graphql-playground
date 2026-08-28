@@ -1,37 +1,45 @@
-[tool.poetry]
-name = "brex-interview-playground-backend"
+[project]
+name = "brex-interview-backend"
 version = "0.1.0"
-description = "Brex Interview Playground Backend (Python)"
-authors = ["Your Name <your.email@example.com>"]
-packages = [{include = "app", from = "src"}]
+description = "Brex interview playground backend (FastAPI + Strawberry GraphQL)"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "sqlalchemy>=2.0",
+    "strawberry-graphql[fastapi]>=0.278",
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-fastapi = "^0.110.0"
-uvicorn = "^0.27.1"
-sqlalchemy = "^2.0.27"
-strawberry-graphql = {extras = ["fastapi"], version = "^0.278.1"}
-pydantic = {extras = ["email"], version = "^2.6.3"}
-alembic = "^1.13.1"
-python-dotenv = "^1.0.1"
-email-validator = "^2.1.0"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.0.2"
-black = "^24.2.0"
-isort = "^5.13.2"
-mypy = "^1.8.0"
-pytest-asyncio = "^0.23.5"
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "httpx>=0.27",
+    "ruff>=0.6",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.black]
+[tool.hatch.build.targets.wheel]
+packages = ["src/app"]
+
+[tool.ruff]
 line-length = 100
-target-version = ["py39"]
 
-[tool.isort]
-profile = "black"
-line_length = 100
-multi_line_output = 3 
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+# B008: `Depends()` in an argument default is the intended FastAPI idiom.
+ignore = ["B008"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    "error::DeprecationWarning:app.*",
+    # Third-party / supplied-scaffold noise we deliberately do not own:
+    "ignore::DeprecationWarning:starlette.*",
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated.*",
+    "ignore:Support for class-based `config` is deprecated.*",
+]

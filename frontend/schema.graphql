@@ -1,0 +1,22 @@
+input CreateMessageInput {
+  content: String!
+}
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+type Message {
+  id: UUID!
+  content: String!
+  createdAt: DateTime!
+}
+
+type Mutation {
+  createMessage(input: CreateMessageInput!): Message!
+}
+
+type Query {
+  latestMessages(limit: Int = 10): [Message!]!
+}
+
+scalar UUID

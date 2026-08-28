@@ -1,5 +1,5 @@
-import HelloWorldDashboard from "~/components/HelloWorldDashboard";
+import MessagesPanel from "~/components/MessagesPanel";
 
 export default function HomePage() {
-  return <HelloWorldDashboard />;
+  return <MessagesPanel />;
 }

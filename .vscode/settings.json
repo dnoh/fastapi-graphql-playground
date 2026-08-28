@@ -1,0 +1,28 @@
+{
+  // Backend interpreter — the uv-managed venv, 3 levels down. VS Code will not
+  // auto-discover it from this workspace root, so point at it explicitly.
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend-python/.venv/bin/python",
+  "python.terminal.activateEnvironment": true,
+
+  // pytest runs from the backend package root so `app.*` imports resolve.
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.cwd": "${workspaceFolder}/backend-python",
+  "python.testing.pytestArgs": ["tests"],
+
+  // Requires the "Ruff" extension (charliermarsh.ruff).
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": { "source.organizeImports.ruff": "explicit" }
+  },
+
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.venv": true,
+    "**/.next": true,
+    "**/uv.lock": true,
+    "**/package-lock.json": true
+  },
+  "files.exclude": { "**/__pycache__": true, "**/.pytest_cache": true }
+}

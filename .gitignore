@@ -1,31 +1,3 @@
-# Backend (Kotlin/Spring)
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
-
 # Backend (Python/FastAPI)
 __pycache__/
 *.py[cod]
@@ -90,7 +62,22 @@ yarn-error.log*
 *.tsbuildinfo
 
 # IDE
-.vscode/
+*.iml
+*.iws
+*.ipr
+# Commit shared editor config so a fresh clone works immediately;
+# ignore everything else under .vscode/ (per-user state).
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
 *.swp
 *.swo
+
+# Local databases (generated)
+*.db
+*.db-wal
+*.db-shm
+
+# uv
+uv.lock.bak

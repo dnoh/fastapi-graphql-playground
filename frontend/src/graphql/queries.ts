@@ -11,11 +11,11 @@ export const GET_LATEST_MESSAGES = gql`
 `;
 
 export const CREATE_MESSAGE = gql`
-  mutation CreateMessage {
-    createMessage {
+  mutation CreateMessage($input: CreateMessageInput!) {
+    createMessage(input: $input) {
       id
       content
       createdAt
     }
   }
-`; 
+`;

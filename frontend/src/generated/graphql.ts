@@ -15,29 +15,35 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** Date with time (isoformat) */
+  DateTime: { input: string; output: string; }
+  UUID: { input: string; output: string; }
 };
 
-/**
- *  Main schema file that defines all types and Query root
- *  Message type definition
- */
+export type CreateMessageInput = {
+  content: Scalars['String']['input'];
+};
+
 export type Message = {
   __typename?: 'Message';
   content: Scalars['String']['output'];
-  createdAt: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  /**  Message mutations */
   createMessage: Message;
+};
+
+
+export type MutationCreateMessageArgs = {
+  input: CreateMessageInput;
 };
 
 export type Query = {
   __typename?: 'Query';
-  /**  Message queries */
-  latestMessages: Array<Maybe<Message>>;
+  latestMessages: Array<Message>;
 };
 
 
@@ -50,9 +56,11 @@ export type GetLatestMessagesQueryVariables = Exact<{
 }>;
 
 
-export type GetLatestMessagesQuery = { __typename?: 'Query', latestMessages: Array<{ __typename?: 'Message', id: string, content: string, createdAt: string } | null> };
+export type GetLatestMessagesQuery = { __typename?: 'Query', latestMessages: Array<{ __typename?: 'Message', id: string, content: string, createdAt: string }> };
 
-export type CreateMessageMutationVariables = Exact<{ [key: string]: never; }>;
+export type CreateMessageMutationVariables = Exact<{
+  input: CreateMessageInput;
+}>;
 
 
 export type CreateMessageMutation = { __typename?: 'Mutation', createMessage: { __typename?: 'Message', id: string, content: string, createdAt: string } };
@@ -101,8 +109,8 @@ export type GetLatestMessagesLazyQueryHookResult = ReturnType<typeof useGetLates
 export type GetLatestMessagesSuspenseQueryHookResult = ReturnType<typeof useGetLatestMessagesSuspenseQuery>;
 export type GetLatestMessagesQueryResult = Apollo.QueryResult<GetLatestMessagesQuery, GetLatestMessagesQueryVariables>;
 export const CreateMessageDocument = gql`
-    mutation CreateMessage {
-  createMessage {
+    mutation CreateMessage($input: CreateMessageInput!) {
+  createMessage(input: $input) {
     id
     content
     createdAt
@@ -124,6 +132,7 @@ export type CreateMessageMutationFn = Apollo.MutationFunction<CreateMessageMutat
  * @example
  * const [createMessageMutation, { data, loading, error }] = useCreateMessageMutation({
  *   variables: {
+ *      input: // value for 'input'
  *   },
  * });
  */
