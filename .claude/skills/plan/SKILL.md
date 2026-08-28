@@ -16,99 +16,130 @@ This skill is project-agnostic. Everything repo-specific — stack, commands, fi
 layout, conventions, domain rules — comes from the repo's `CLAUDE.md`. Read it
 first and treat it as authoritative; never assume a stack or a command.
 
+## The budget: a 2-minute read
+
+**Hard cap: 140 lines, of which ≤400 words are prose** — text outside tables and
+code blocks. Tables are line-cheap and scan fast; paragraphs are what make a doc
+unreadable, so budget those specifically. The verbatim appendix doesn't count.
+
+A plan an engineer will not finish reading is a plan nobody checked. This is the
+single most important rule in this file — if the doc is over budget, cut it; do
+not append a note apologising for length.
+
+- **Tables and bullets carry the content.** Prose only where a table cannot.
+- **One idea per line.** Short sentences. No paragraph longer than 3 lines.
+- **Never say the same thing twice.** The most common bloat is restating the ask
+  in your own words after quoting it. Quote once, in the appendix, and reference it.
+- Rationale is a **clause, not a paragraph** — "…because SQLite has no NUMERIC".
+
 ## Phase 1 — Explore (read-only)
 
 Map the parts of the codebase this feature touches: existing models, services,
-API patterns, test setup. Note what patterns already exist that this feature
-should follow rather than reinvent — find the closest existing feature and use it
-as the template. Then skim `checklist.md` (next to this file) once and note which
-sections apply; most won't.
+API patterns, test setup. Find the closest existing feature and use it as the
+template rather than reinventing. Skim `checklist.md` (next to this file) once
+and note which sections apply; most won't.
 
 ## Phase 2 — Clarify (stop and wait)
 
-Ask via the **AskUserQuestion** tool, not prose — it renders selectable options
-instead of a list the user has to answer by number. Ask only questions whose
-answers change the design. If a reasonable senior engineer would just pick a
-default, pick it and record it in the Trade-offs table instead of asking.
-Do not write the doc until the user has answered. If the user's request already
-answers everything, skip this phase.
+Ask via the **AskUserQuestion** tool, not prose. Ask only questions whose answers
+change the design. If a reasonable senior engineer would just pick a default,
+pick it and record it in Trade-offs instead of asking. Do not write the doc until
+the user has answered. Skip this phase if the request already answers everything.
 
 ## Phase 3 — Write the doc
 
-Write to `docs/plans/<feature-slug>.md` using exactly this structure:
+Write to `docs/plans/<feature-slug>.md` using exactly this structure and order.
 
-# <Feature>
+### `# <Feature>`
 
-## Original ask
+One line: what this builds, for whom.
 
-Reproduce the requirements **verbatim** — the whole Requirements section of the
-input file, or the inline text if there was no file — and cite the source path.
-Never paraphrase: this is what `/review` checks the plan against, so a
-requirement lost here is lost silently and permanently.
+### `## Requirements`
 
-## Requirements
+A traceability table — this replaces restating the ask in prose:
 
-Functional requirements, then an explicit **Non-goals** list. Naming what you are
-deliberately not building is a stronger signal than building it. If `CLAUDE.md`
-has a deferred/out-of-scope list, start from it.
+| # | Requirement | Decision |
+|---|---|---|
+| R1 | Create accounts | Build — `createAccount` |
+| C8 | Cross-account transfers | **Non-goal** |
 
-## Entities & Data Models
+Every numbered item from the ask gets a row. Every row is either built or an
+explicit non-goal. A silently dropped requirement is the failure this table
+exists to prevent. Add a short **Non-goals** bullet list under it for
+deferrals that came from `CLAUDE.md` rather than the ask.
 
-Fields, types, constraints, invariants. State per entity whether it is a new
-table or a change to an existing one, and what that implies for the repo's
-migration story (see `CLAUDE.md`).
+### `## Entities & Data Models`
 
-## API & Interfaces
+One table per entity: column, type, constraints. Then **one line** per entity
+saying why it is shaped that way, and one line stating any invariant. Say whether
+each is a new table or a change to an existing one, and what that means for the
+repo's migration story.
 
-Signatures, input types, return types, error codes. These are contracts —
-implementation must not silently diverge from them.
+### `## API & Interfaces`
 
-## Data Flow
+The contract, as a signature block plus an error-code table. Add a **Why** column
+or a one-line note for any non-obvious choice (why a string and not an int, why
+this is nested rather than top-level). Implementation must not silently diverge
+from what is written here.
 
-Mermaid diagram of the request path. Skip it when the path is the repo's
-standard one; draw it only when the feature departs from that.
+### `## Data Flow`
 
-## Trade-offs
+**Numbered steps, one per line, for each flow that is not the repo's standard
+path.** This is the section engineers actually use, so be concrete:
 
-| Decision | Rejected alternative | Why |
-Every non-obvious choice goes here. This table is where senior judgment lives.
+```
+postTransaction(input)
+1. parse amount → Decimal → cents      [VALIDATION_ERROR]
+2. look up account by number           [NOT_FOUND]
+3. if idempotency key seen → return original
+4. UPDATE … WHERE balance >= amt RETURNING   [INSUFFICIENT_FUNDS if 0 rows]
+5. INSERT ledger row
+6. COMMIT (once)
+```
 
-## Milestones
+Add a mermaid diagram only if the step list genuinely needs one. Skip the whole
+section for flows that follow the repo's standard path — say so in one line.
 
-Sequential, and **ordered so that every milestone ends in something demoable** —
-not merely compiling. Assume the work may be cut off at any milestone boundary:
-whatever is finished must be a coherent thing you can show end-to-end, not a
-half-built subsystem. Prefer a thin vertical slice first over a complete backend
-with no frontend.
+### `## Trade-offs`
 
-Each milestone must also end with the system coherent: tests passing, nothing
-half-wired. For each:
+| Decision | Rejected | Why | Open? |
+|---|---|---|---|
 
-- **Scope** — what changes, in terms of contracts, not step-by-step procedure
-- **Done when** — observable success criteria
-- **Tests** — happy path, edge cases specific to this domain (not generic
-  null-checks), and regressions to guard if touching existing behavior
-- **Est. size** — should read as a single reviewable PR: system coherent,
-  main stays green, one sitting to review. Target ≤400 changed lines
-  including tests; if it won't fit, split the milestone
-- **Verification** — the exact commands that prove it, taken from `CLAUDE.md`.
-  Include any conditional steps the repo needs (regenerate types, reset a dev
-  DB, run a migration) and say what triggers each
+The **Open?** column marks rows you want the engineer to push back on — mark the
+genuinely contestable ones, not everything. This table is where senior judgment
+lives; keep the Why to one clause.
+
+### `## Milestones`
+
+A summary table first:
+
+| # | Milestone | Demoable when | Size |
+|---|---|---|---|
+
+Then, per milestone, a short block: **Scope** (contracts, not procedure),
+**Done when** (observable criteria as bullets), **Tests** (a bullet list of
+cases — the implementer turns these into the test table), **Verification** (the
+exact commands from `CLAUDE.md`, with what triggers each conditional step).
+
+Order so **every milestone ends in something demoable** end-to-end — assume the
+work is cut off at any boundary. Prefer a thin vertical slice first over a
+complete backend with no frontend.
+
+### `## Appendix — the ask, verbatim`
+
+The requirements reproduced **verbatim** in a fenced block, with the source path.
+Never paraphrase: `/review` checks the plan against this. It goes last because it
+is reference material, not reading material.
 
 ## Rules
 
-- Every milestone must be estimatable at ≤400 changed lines including tests.
-  If a milestone exceeds this, split it — do not write it as one milestone
-  with a note that it's large. Generated files, lockfiles, and migrations
-  don't count toward the estimate; `CLAUDE.md` says which files are generated.
-- Contracts, not choreography: never write "create file X then add method Y".
-  The implementer decides procedure at implementation time.
-- Prefer the minimal design that satisfies requirements. Flag any speculative
-  generality in Trade-offs as rejected.
-- If exploration reveals the feature conflicts with existing architecture,
-  say so before writing the plan.
-- Plan docs are committed, and so are requirements files. Do not write anywhere
-  else under `docs/` — the rest is private scratch.
-- Every numbered requirement in the ask must end up either in the contracts or
-  explicitly under Non-goals. Dropping one silently is the failure mode this
-  structure exists to prevent.
+- **Respect the 120-line budget.** Everything else is subordinate to it.
+- Every milestone ≤400 changed lines including tests. If it won't fit, split it —
+  never write one large milestone with a note that it's large. Generated files
+  and lockfiles don't count; `CLAUDE.md` says which files are generated.
+- Contracts, not choreography: never "create file X then add method Y".
+- Prefer the minimal design. Flag speculative generality in Trade-offs as rejected.
+- If exploration reveals a conflict with existing architecture, say so before
+  writing the plan.
+- Only `docs/requirements/` and `docs/plans/` are committed; the rest of `docs/`
+  is private scratch. Do not write elsewhere.

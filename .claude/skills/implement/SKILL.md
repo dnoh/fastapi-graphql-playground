@@ -44,11 +44,52 @@ between milestones; that is fine, keep going with the context you have.
    If it won't fit, stop and propose a split.
 4. **Verify.** Run the repo's "Before you say done" loop from `CLAUDE.md`, in the
    order it gives, including every conditional step whose trigger applies (a schema
-   change, a model change, a migration). Then check each "done when" criterion from
-   the plan doc and report pass/fail **per criterion**, not just "tests pass".
-5. **Close out.** Check off the milestone in the plan doc. If implementation
+   change, a model change, a migration). **Chain the whole loop into one shell
+   invocation** (`a && b && c && d`) rather than one call per step — the round
+   trips are most of the wall-clock cost of this skill. Only re-run a step
+   individually when it fails.
+5. **Report.** Tables, not paragraphs. See "Report format" below.
+6. **Close out.** Check off the milestone in the plan doc. If implementation
    forced any deviation from the doc's contracts, update the doc and flag the
    change loudly — silent divergence is the failure mode.
+
+## Report format
+
+Keep the whole report under ~30 lines. Three tables and nothing else. No
+narrative summary of what you did — the tables say it.
+
+**1. Verification loop** — one row per step, with whether its trigger applied:
+
+| Step | Trigger | Result |
+|---|---|---|
+| `make reset-db` | model added | ✅ |
+
+**2. Tests** — every test added this milestone, and what it proves. This is the
+table the reviewer reads instead of opening the test file:
+
+| Test | Asserts | Case type |
+|---|---|---|
+| `test_overdraft_is_rejected` | `INSUFFICIENT_FUNDS`, balance unchanged, no ledger row | edge |
+| `test_balance_equals_credits_minus_debits` | denormalized balance == recomputed ledger | invariant |
+
+Mark each `happy` / `edge` / `invariant` / `regression`. If a "done when"
+criterion has no test behind it, say so in that row.
+
+**3. Manual test flows** — what a human should click through before the next
+milestone, because automated tests do not cover it. Always include at least the
+happy path and one failure path:
+
+| Flow | Steps | Expected |
+|---|---|---|
+| Overdraft | pick account → Debit → amount > balance → Post | inline error + code; balance unchanged |
+
+Run these yourself where the tooling allows, and mark each row ✅ verified or
+⬜ needs a human. Do not walk a flow in a browser that a test already covers
+end-to-end — the manual pass is for what tests cannot see (layout, wiring,
+persistence across refresh).
+
+After the tables, at most 3 bullets: deviations from the plan's contracts,
+anything left out, and the change size if it overran the estimate. Nothing else.
 
 ## Constraints
 
