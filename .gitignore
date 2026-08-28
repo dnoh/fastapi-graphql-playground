@@ -82,16 +82,8 @@ yarn-error.log*
 # uv
 uv.lock.bak
 
-# Local prep notes / scratch docs — intentionally NOT committed.
-# NOTE: this must be `docs/*`, not `docs/`. Git will not descend into an
-# excluded directory, so a `!docs/plans/` negation cannot re-include anything
-# under a plain `docs/` rule.
-docs/*
-# ...except the plan pipeline. `docs/requirements/` is the input (the ask, its
-# non-goals and decisions); `docs/plans/` is what `/plan` writes and `/implement`
-# and `/review` read back. Both are real project artifacts and belong in git.
-!docs/requirements/
-!docs/plans/
+# docs/ is committed in full: `requirements/` is the plan pipeline's input,
+# `plans/` is its output, and the rest is working notes. Single-author repo.
 
 # Claude Code: share CLAUDE.md, .claude/settings.json and .claude/skills/;
 # keep per-user local overrides out.
