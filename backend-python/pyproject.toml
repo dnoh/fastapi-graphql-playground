@@ -1,7 +1,7 @@
 [project]
-name = "brex-interview-backend"
+name = "fastapi-graphql-playground"
 version = "0.1.0"
-description = "Brex interview playground backend (FastAPI + Strawberry GraphQL)"
+description = "FastAPI + Strawberry GraphQL playground backend"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.110",

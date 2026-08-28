@@ -83,6 +83,14 @@ yarn-error.log*
 uv.lock.bak
 
 # Local prep notes / scratch docs — intentionally NOT committed.
-# (If you ever want real project docs in git, use a different path
-#  or negate a specific file, e.g. !docs/architecture.md)
-docs/
+# NOTE: this must be `docs/*`, not `docs/`. Git will not descend into an
+# excluded directory, so a `!docs/plans/` negation cannot re-include anything
+# under a plain `docs/` rule.
+docs/*
+# ...except plan docs. `/plan` writes contracts that `/implement` and `/review`
+# read back, so they are real project artifacts and belong in git.
+!docs/plans/
+
+# Claude Code: share CLAUDE.md, .claude/settings.json and .claude/skills/;
+# keep per-user local overrides out.
+.claude/settings.local.json

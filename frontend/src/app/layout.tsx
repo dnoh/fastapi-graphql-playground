@@ -3,7 +3,7 @@ import "~/styles/globals.css";
 import { Providers } from "./providers";
 
 export const metadata = {
-  title: "Brex Interview Playground",
+  title: "FastAPI GraphQL Playground",
   description: "Basic fullstack setup to start hacking",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };

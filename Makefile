@@ -1,4 +1,4 @@
-# Brex interview scaffold — run every target from the repo root.
+# FastAPI GraphQL Playground — run every target from the repo root.
 #
 #   make dev        both servers in one terminal (Ctrl-C stops both)
 #   make backend    API only,  http://localhost:8080/graphql
@@ -21,7 +21,7 @@ install: ## first-time setup (or after a fresh clone)
 	cd $(FE) && npm install
 
 doctor: ## verify (and silently repair) the backend venv
-	@cd $(BE) && uv run python -c "import app" >/dev/null 2>&1 \
+	@cd $(BE) && { uv run python -c "import app" && uv run pytest --version; } >/dev/null 2>&1 \
 	  || { echo "  backend venv is stale - rebuilding..."; \
 	       rm -rf .venv && uv sync -q && echo "  rebuilt."; }
 

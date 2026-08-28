@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
 
 
-app = FastAPI(title="Brex Interview Playground", lifespan=lifespan)
+app = FastAPI(title="FastAPI GraphQL Playground", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

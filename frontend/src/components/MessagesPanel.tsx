@@ -35,7 +35,7 @@ export default function MessagesPanel() {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="mx-auto max-w-2xl space-y-6">
         <header>
-          <h1 className="text-3xl font-bold text-gray-900">Brex Interview Playground</h1>
+          <h1 className="text-3xl font-bold text-gray-900">FastAPI GraphQL Playground</h1>
           <p className="text-gray-600">Messages — the vertical slice template.</p>
         </header>
 

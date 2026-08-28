@@ -1,6 +1,7 @@
-# Brex Interview Playground Backend (Python)
+# FastAPI GraphQL Playground — Backend
 
-A FastAPI and Strawberry GraphQL implementation of the Brex Interview Playground Python Backend.
+A FastAPI + Strawberry GraphQL backend over SQLite. GraphQL is the active API; a small
+REST surface is included as an alternative.
 
 ## Technologies Used
 

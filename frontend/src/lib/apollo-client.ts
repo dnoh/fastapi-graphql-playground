@@ -1,7 +1,10 @@
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 
+import { env } from "~/env";
+
 export const client = new ApolloClient({
-  uri: "http://localhost:8080/graphql",
+  // Full GraphQL endpoint; override with NEXT_PUBLIC_API_URL (see .env.example).
+  uri: env.NEXT_PUBLIC_API_URL,
   cache: new InMemoryCache(),
   defaultOptions: {
     watchQuery: {
@@ -13,4 +16,4 @@ export const client = new ApolloClient({
       errorPolicy: "all",
     },
   },
-}); 
+});

@@ -1,4 +1,4 @@
-# Brex Interview Playground
+# FastAPI GraphQL Playground
 
 A small full-stack app: **FastAPI + Strawberry GraphQL** backend, **Next.js + Apollo**
 frontend, **SQLite** database. Built to add features fast without fighting setup.

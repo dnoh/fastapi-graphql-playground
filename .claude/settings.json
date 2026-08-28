@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(make *)",
+      "Bash(uv run *)",
+      "Bash(npm run *)",
+      "Bash(curl localhost*)",
+      "Bash(sqlite3 *)"
+    ]
+  }
+}
