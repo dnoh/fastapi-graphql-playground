@@ -81,3 +81,8 @@ yarn-error.log*
 
 # uv
 uv.lock.bak
+
+# Local prep notes / scratch docs — intentionally NOT committed.
+# (If you ever want real project docs in git, use a different path
+#  or negate a specific file, e.g. !docs/architecture.md)
+docs/
