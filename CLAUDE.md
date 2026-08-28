@@ -144,8 +144,12 @@ The skills are project-agnostic and reusable; **this file is the only place that
 knows the stack, and `.claude/domains/` is the only place that knows the domain.** They read "Before you say done" for the verification loop and
 this file's conventions for layer rules.
 
-`/plan` writes contracts and milestones to `docs/plans/<slug>.md` (committed; the
-rest of `docs/` is private scratch). `/implement` does **one** milestone per
+The plan pipeline has two committed folders: **`docs/requirements/`** is the input
+(the verbatim ask, its non-goals and decisions — start from `_template.md`), and
+**`docs/plans/`** is what `/plan` writes. Everything else under `docs/` is private
+scratch. `/plan` takes either a requirements path or an inline description, and
+copies the ask verbatim into the plan so `/review` can check that no requirement
+went missing between the two. `/implement` does **one** milestone per
 invocation — announces its intent, proceeds, stops when verified; add "propose first"
 to get a blocking approval gate. `/review` fans out four fresh-context subagents:
 plan-correctness, design, safety, and the general `checklist.md` that ships with the

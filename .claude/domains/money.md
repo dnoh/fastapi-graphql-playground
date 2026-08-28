@@ -15,8 +15,19 @@ general good practice lives in `.claude/skills/review/checklist.md`.
 - **One commit per operation.** A transfer is debit + credit (+ ledger row) and then
   a single `commit()` in the service. Never commit between the legs — a crash there
   destroys money.
-- **Read and write the balance in the same transaction.** "Is there enough?" and the
-  debit must happen inside one service call; split across two transactions it's a race.
+- **The overdraw check happens INSIDE the write, never as a read-then-write.**
+  A conditional update — `UPDATE accounts SET balance = balance - :amt WHERE id = :id
+  AND balance >= :amt`, then reject when `rowcount == 0` — or an explicit row lock.
+  Reading the balance, checking it in Python, then writing is a lost update: two
+  concurrent debits both read the old balance and both pass. Being inside one
+  transaction is necessary but NOT sufficient — under Postgres `READ COMMITTED` the
+  naive version still races. Be able to say why.
+- **Parse money from strings with `Decimal`, never `float`.** `float("0.29") * 100`
+  is `28.999...`; `Decimal("0.29").scaleb(2)` is exactly `29`. Reject more than two
+  decimal places and any negative amount at the boundary, and pin it with a unit test.
+- **Balance is denormalized; state its invariant explicitly.**
+  `balance == Σ(credits) − Σ(debits)`, and prove it in a test that posts several
+  transactions and recomputes. A derived value nobody checks drifts.
 - **Invariants in the database, not only in Python.** `CHECK (balance >= 0)`,
   `UNIQUE(idempotency_key)`, FKs on. App validation is the friendly message; the
   constraint is what holds.

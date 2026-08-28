@@ -1,11 +1,16 @@
 ---
 name: plan
 description: Research the codebase and produce a plan doc with contracts and milestones for a feature
-argument-hint: "<feature description>"
+argument-hint: "<requirements-file-path | feature description>"
 effort: high
 ---
 
 Feature to plan: $ARGUMENTS
+
+**Input** is either a path to a requirements file (normally under
+`docs/requirements/`) or an inline description. If it is a path, read that file
+first and treat it as the authoritative ask. **Output** always goes to
+`docs/plans/<feature-slug>.md` — input and output never share a folder.
 
 This skill is project-agnostic. Everything repo-specific — stack, commands, file
 layout, conventions, domain rules — comes from the repo's `CLAUDE.md`. Read it
@@ -33,6 +38,13 @@ answers everything, skip this phase.
 Write to `docs/plans/<feature-slug>.md` using exactly this structure:
 
 # <Feature>
+
+## Original ask
+
+Reproduce the requirements **verbatim** — the whole Requirements section of the
+input file, or the inline text if there was no file — and cite the source path.
+Never paraphrase: this is what `/review` checks the plan against, so a
+requirement lost here is lost silently and permanently.
 
 ## Requirements
 
@@ -95,5 +107,8 @@ half-wired. For each:
   generality in Trade-offs as rejected.
 - If exploration reveals the feature conflicts with existing architecture,
   say so before writing the plan.
-- Plan docs are committed. Do not write anywhere else under `docs/` unless
-  `CLAUDE.md` says so.
+- Plan docs are committed, and so are requirements files. Do not write anywhere
+  else under `docs/` — the rest is private scratch.
+- Every numbered requirement in the ask must end up either in the contracts or
+  explicitly under Non-goals. Dropping one silently is the failure mode this
+  structure exists to prevent.

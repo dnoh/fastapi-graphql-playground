@@ -87,8 +87,10 @@ uv.lock.bak
 # excluded directory, so a `!docs/plans/` negation cannot re-include anything
 # under a plain `docs/` rule.
 docs/*
-# ...except plan docs. `/plan` writes contracts that `/implement` and `/review`
-# read back, so they are real project artifacts and belong in git.
+# ...except the plan pipeline. `docs/requirements/` is the input (the ask, its
+# non-goals and decisions); `docs/plans/` is what `/plan` writes and `/implement`
+# and `/review` read back. Both are real project artifacts and belong in git.
+!docs/requirements/
 !docs/plans/
 
 # Claude Code: share CLAUDE.md, .claude/settings.json and .claude/skills/;

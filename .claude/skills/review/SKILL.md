@@ -20,8 +20,12 @@ session's full conversation history, which is exactly what this skill exists to
 avoid. Each subagent gets ONLY: the diff, the plan doc path, the path to
 `CLAUDE.md`, and its brief below. Fresh eyes are the point.
 
-**Reviewer 1 — Correctness against the plan.** Does the diff implement the
-milestone's contracts and success criteria exactly? Any silent divergence from
+**Reviewer 1 — Correctness against the plan.** First check the plan against
+its own "Original ask" section: is every numbered requirement either in the
+contracts or listed under Non-goals? A requirement that silently vanished
+between the ask and the plan is a BLOCKER, and nothing else in this review
+would catch it. Then: does the diff implement the milestone's contracts and
+success criteria exactly? Any silent divergence from
 documented interfaces, data models, or error codes? Are the doc's listed tests
 actually present and meaningful? If `CLAUDE.md` names generated files or a
 migration step, were they actually regenerated / run — or is the diff green only
