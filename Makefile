@@ -62,4 +62,12 @@ codegen: schema ## regenerate TS types (no running server needed)
 
 reset-db: ## drop the dev database — REQUIRED after any model change
 	rm -f $(BE)/app.db $(BE)/app.db-wal $(BE)/app.db-shm
-	@echo "dev database removed; it is recreated and reseeded on next backend start"
+	@# SQLite keeps serving a deleted file through its open fd, so a running
+	@# server would silently continue on the old database. Touching a watched
+	@# .py file makes uvicorn --reload restart, which recreates and reseeds it.
+	@if lsof -ti tcp:8080 >/dev/null 2>&1; then \
+	  touch $(BE)/src/app/main.py; \
+	  echo "dev database removed; backend was running - reload triggered (recreated + reseeded in ~1s)"; \
+	else \
+	  echo "dev database removed; it is recreated and reseeded on next backend start"; \
+	fi
