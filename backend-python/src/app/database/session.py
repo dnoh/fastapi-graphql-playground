@@ -9,9 +9,18 @@ _is_sqlite = settings.database_url.startswith("sqlite")
 
 engine = create_engine(
     settings.database_url,
-    # SQLite only: FastAPI serves requests from a threadpool, so the connection
-    # must be usable from more than the thread that created it.
-    connect_args={"check_same_thread": False} if _is_sqlite else {},
+    connect_args=(
+        {
+            # FastAPI serves requests from a threadpool, so the connection must
+            # be usable from more than the thread that created it.
+            "check_same_thread": False,
+            # Bound how long a writer waits for the single write lock instead of
+            # failing immediately with "database is locked".
+            "timeout": settings.sqlite_busy_timeout_s,
+        }
+        if _is_sqlite
+        else {}
+    ),
 )
 
 

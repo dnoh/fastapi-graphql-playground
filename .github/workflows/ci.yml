@@ -1,0 +1,48 @@
+# One job on purpose: it runs the same `make verify` you run locally, so CI
+# cannot drift from the loop in CLAUDE.md. The two extra steps are the things
+# that are too slow or too stateful to want in the inner loop.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd backend-python && uv sync --frozen
+          cd ../frontend && npm ci
+
+      # codegen + backend lint/tests + frontend lint/format/types.
+      - name: make verify
+        run: make verify
+
+      # `make verify` regenerates the SDL and the TS types. If either moved,
+      # someone changed the schema without committing what codegen produced —
+      # backend tests would pass while the UI compiled against stale types.
+      - name: Generated files are committed and current
+        run: |
+          git diff --exit-code -- frontend/schema.graphql frontend/src/generated/graphql.ts \
+            || { echo "::error::Generated files are stale. Run 'make codegen' and commit the result."; exit 1; }
+
+      # Catches server/client boundary errors that `tsc --noEmit` cannot see.
+      # Kept out of `make verify` so the inner loop stays ~3s.
+      - name: Production build
+        run: cd frontend && npm run build

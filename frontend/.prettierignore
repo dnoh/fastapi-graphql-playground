@@ -1,0 +1,10 @@
+# Generated — never hand-formatted, never hand-edited.
+src/generated/
+schema.graphql
+next-env.d.ts
+
+# Build output and deps.
+.next/
+out/
+node_modules/
+*.tsbuildinfo

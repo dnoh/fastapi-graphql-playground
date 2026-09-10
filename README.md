@@ -29,7 +29,7 @@ to write — the defaults work.
 | Tool | Version | Install |
 |---|---|---|
 | [uv](https://docs.astral.sh/uv/) | ≥ 0.5 | `brew install uv` |
-| Node | ≥ 20.9 | `brew install node` |
+| Node | ≥ 20.9 (CI pins `.nvmrc`) | `brew install node` |
 
 You do **not** need Python preinstalled — `uv` reads `requires-python` and downloads
 CPython 3.12 itself.
@@ -43,19 +43,47 @@ CPython 3.12 itself.
 | `make dev` | both servers in one terminal |
 | `make backend` / `make frontend` | one at a time, in separate terminals |
 | `make stop` | force-free ports 8080 / 3000 |
+| `make verify` | **run this before you call anything done** — the whole loop, ~5s |
 | `make test` | backend test suite |
-| `make lint` | format + autofix the backend (ruff) |
-| `make check` | frontend lint + typecheck |
+| `make lint` | format + autofix the backend (ruff) — rewrites files, on demand only |
+| `make lint-check` | the same checks read-only, rewriting nothing — what CI runs |
+| `make check` | frontend ESLint + Prettier + `tsc --noEmit` |
 | `make schema` | export the GraphQL SDL to `frontend/schema.graphql` |
 | `make codegen` | regenerate TS types from the SDL (no running server needed) |
 | `make reset-db` | drop the dev database — **required after any model change** |
 | `make doctor` | verify the backend venv, rebuilding it if stale (runs automatically before `dev`/`backend`/`test`) |
+
+## Verifying a change
+
+```bash
+make verify      # codegen + backend lint/tests + frontend lint/format/types
+```
+
+One command, about five seconds, and it is the same command CI runs. It exists
+because the loop has an ordering trap: a schema change that skips `make codegen`
+leaves the backend tests passing against the new schema while the UI still
+compiles against the old types. Everything reports green and the app is broken.
+
+`make reset-db` is deliberately **not** part of it. That target drops data, and
+you only need it after a model change. Run it yourself, then re-run `verify`.
+
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs `make verify`
+plus two things too slow or too stateful for the inner loop:
+
+- `next build`, which catches server/client boundary errors `tsc --noEmit` cannot see.
+- a check that `schema.graphql` and `src/generated/graphql.ts` are committed and
+  current, so a schema change can never merge with stale generated types.
+
+There is a liveness probe at <http://localhost:8080/health>. It is the one route
+that is not GraphQL, on purpose: a health check that needs the GraphQL layer to
+answer cannot tell you the GraphQL layer is down.
 
 ## Layout
 
 ```
 backend-python/
   src/app/
+    main.py            app wiring, lifespan seed, /health probe
     config.py          settings from env (DATABASE_URL, CORS_ORIGINS)
     errors.py          DomainError(message, code)
     models/            SQLAlchemy models
@@ -105,9 +133,21 @@ not used by the frontend.
 | Something still listening after Ctrl-C | `make stop` |
 | "no such column" after adding a model field | `make reset-db` |
 | Types stale after a schema change | `make codegen` |
+| `make check` fails only on formatting | `cd frontend && npm run format:write` |
+| `make lint-check` fails | `make lint` (it rewrites; `lint-check` only reports) |
 
 ## Deliberately not included
 
 Alembic migrations, authentication, cursor pagination, structured logging, Postgres,
-Docker, and frontend tests. Each is a considered omission for a small, fast-moving
-app — not an oversight.
+Docker, and frontend tests are absent from the **scaffold**. That is not a rule for
+features: a feature plan defaults to building these to industry standard, and waives
+one only when the requirements say so or call the work a prototype.
+
+**A Python type checker is also omitted, and that one needs a reason.** mypy and
+ty both flag exactly the same two lines: the resolvers in `api/graphql/schema.py`
+return SQLAlchemy models where the annotation promises Strawberry types. That code
+is correct — Strawberry resolves fields by attribute access — but it is the pattern
+every new entity copies, so turning a checker on means a fresh error per resolver
+and a conversion layer to write for each one. Add the checker only if you first
+change the pattern. Coverage is skipped for a related reason: a number nobody has
+time to act on is not a signal.

@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 import {
   useCreateMessageMutation,
   useGetLatestMessagesQuery,
-} from '~/generated/graphql';
+} from "~/generated/graphql";
 
-import { ErrorBanner, Loading, errorCode } from './ui/Feedback';
+import { ErrorBanner, Loading, errorCode } from "./ui/Feedback";
 
 export default function MessagesPanel() {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
 
   const { data, loading, error, refetch } = useGetLatestMessagesQuery({
     variables: { limit: 10 },
@@ -25,7 +25,7 @@ export default function MessagesPanel() {
     if (!trimmed) return;
 
     await createMessage({ variables: { input: { content: trimmed } } });
-    setContent('');
+    setContent("");
     await refetch();
   }
 
@@ -35,12 +35,22 @@ export default function MessagesPanel() {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="mx-auto max-w-2xl space-y-6">
         <header>
-          <h1 className="text-3xl font-bold text-gray-900">FastAPI GraphQL Playground</h1>
-          <p className="text-gray-600">Messages — the vertical slice template.</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            FastAPI GraphQL Playground
+          </h1>
+          <p className="text-gray-600">
+            Messages — the vertical slice template.
+          </p>
         </header>
 
-        <form onSubmit={handleSubmit} className="rounded-lg bg-white p-6 shadow">
-          <label htmlFor="content" className="mb-2 block font-medium text-gray-900">
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-lg bg-white p-6 shadow"
+        >
+          <label
+            htmlFor="content"
+            className="mb-2 block font-medium text-gray-900"
+          >
             New message
           </label>
           <div className="flex gap-2">
@@ -56,18 +66,23 @@ export default function MessagesPanel() {
               disabled={creating || !content.trim()}
               className="rounded-md bg-gray-900 px-4 py-2 font-medium text-white disabled:opacity-40"
             >
-              {creating ? 'Adding…' : 'Add'}
+              {creating ? "Adding…" : "Add"}
             </button>
           </div>
           {createError && (
             <div className="mt-4">
-              <ErrorBanner message={createError.message} code={errorCode(createError)} />
+              <ErrorBanner
+                message={createError.message}
+                code={errorCode(createError)}
+              />
             </div>
           )}
         </form>
 
         <section className="rounded-lg bg-white p-6 shadow">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">Recent messages</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            Recent messages
+          </h2>
 
           {loading ? (
             <Loading />

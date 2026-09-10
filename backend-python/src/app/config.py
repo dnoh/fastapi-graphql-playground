@@ -22,5 +22,13 @@ class Settings(BaseSettings):
     # opaque CORS error. Set CORS_ORIGIN_REGEX="" to disable.
     cors_origin_regex: str = r"http://localhost:\d+"
 
+    # Root log level. Uvicorn configures only its own loggers, so without
+    # this the application's audit lines never reach the console.
+    log_level: str = "INFO"
+
+    # How long a write waits for SQLite's single writer lock before giving up.
+    # Money writes open with BEGIN IMMEDIATE, so this bounds the queue.
+    sqlite_busy_timeout_s: float = 5.0
+
 
 settings = Settings()

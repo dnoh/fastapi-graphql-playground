@@ -1,0 +1,50 @@
+{
+  // F5 (or the Run and Debug panel) picks one of these. All run inside the
+  // uv venv from backend-python so `app.*` imports resolve. The tests run
+  // under pytest — running a test file as a plain script executes nothing.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Used by the gutter arrow / Test Explorer "Debug Test". The extension
+      // supplies the pytest runner itself, so this MUST NOT set module/program/args.
+      "name": "Debug Test (gutter)",
+      "type": "debugpy",
+      "request": "launch",
+      "purpose": ["debug-test"],
+      "cwd": "${workspaceFolder}/backend-python",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Debug current test file",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "cwd": "${workspaceFolder}/backend-python",
+      "args": ["${file}", "-x", "-p", "no:cacheprovider"],
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Debug all backend tests",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "cwd": "${workspaceFolder}/backend-python",
+      "args": ["tests", "-x"],
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Debug backend API (:8080)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      // No --reload: the reloader forks a child the debugger can't attach to.
+      "args": ["app.main:app", "--port", "8080"],
+      "cwd": "${workspaceFolder}/backend-python",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}

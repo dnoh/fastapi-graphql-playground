@@ -4,10 +4,11 @@
 #   make backend    API only,  http://localhost:8080/graphql
 #   make frontend   UI only,   http://localhost:3000
 #   make test       backend test suite
+#   make test-fe    frontend test suite
 #   make reset-db   REQUIRED after changing any model
 #
 .DEFAULT_GOAL := help
-.PHONY: help dev stop backend frontend test lint codegen schema reset-db install check doctor
+.PHONY: help dev stop backend frontend test test-fe lint lint-check fmt codegen schema reset-db install check doctor verify
 
 BE   := backend-python
 FE   := frontend
@@ -51,8 +52,28 @@ test: doctor ## backend tests
 lint: ## format + autofix the backend
 	cd $(BE) && uv run ruff format src tests && uv run ruff check src tests --fix
 
+lint-check: ## backend lint/format, read-only (rewrites nothing) — what CI runs
+	cd $(BE) && uv run ruff format --check src tests && uv run ruff check src tests
+
+fmt: lint ## format backend + frontend — run before verify on files you just wrote
+	cd $(FE) && npm run format:write
+
+test-fe: ## frontend tests (Vitest + Testing Library, jsdom)
+	cd $(FE) && npm test
+
 check: ## frontend lint + typecheck
 	cd $(FE) && npm run check
+
+verify: ## the whole "before you say done" loop, in order
+	@$(MAKE) --no-print-directory codegen
+	@$(MAKE) --no-print-directory lint-check
+	@$(MAKE) --no-print-directory test
+	@$(MAKE) --no-print-directory check
+	@$(MAKE) --no-print-directory test-fe
+	@echo ""
+	@echo "  verify OK - codegen, backend lint + tests, frontend lint/format/types + tests."
+	@echo "  reset-db is NOT included: it drops data, and is only needed after a"
+	@echo "  model change. Run it yourself, then re-run verify."
 
 schema: ## export GraphQL SDL to frontend/schema.graphql
 	cd $(BE) && uv run python -c "from app.api.graphql.schema import schema; print(schema.as_str())" > ../frontend/schema.graphql

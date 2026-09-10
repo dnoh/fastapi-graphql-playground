@@ -17,7 +17,10 @@ export const env = createEnv({
    */
   client: {
     // Full GraphQL endpoint. Defaulted so a fresh clone runs with no .env file.
-    NEXT_PUBLIC_API_URL: z.string().url().default("http://localhost:8080/graphql"),
+    NEXT_PUBLIC_API_URL: z
+      .string()
+      .url()
+      .default("http://localhost:8080/graphql"),
   },
 
   /**

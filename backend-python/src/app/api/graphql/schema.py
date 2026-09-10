@@ -5,6 +5,7 @@ logic, no commits. `domain_errors` maps a DomainError onto a GraphQL error
 carrying `extensions.code`.
 """
 
+import logging
 from collections.abc import Callable
 from datetime import datetime
 from functools import wraps
@@ -15,11 +16,13 @@ import strawberry
 from fastapi import Depends
 from graphql import GraphQLError
 from sqlalchemy.orm import Session
-from strawberry.types import Info
+from strawberry.types import ExecutionContext, Info
 
 from ...database.session import get_db
 from ...errors import DomainError
 from ...services import messages as message_service
+
+logger = logging.getLogger(__name__)
 
 
 def domain_errors(resolver: Callable[..., Any]) -> Callable[..., Any]:
@@ -69,4 +72,41 @@ class Mutation:
         return message_service.create_message(db, content=input.content)
 
 
-schema = strawberry.Schema(query=Query, mutation=Mutation)
+def _domain_error_behind(error: GraphQLError) -> DomainError | None:
+    """The DomainError behind a GraphQL error, if this was an expected failure."""
+    cause: BaseException | None = error.original_error
+    for _ in range(4):  # bounded: the chain is GraphQLError -> DomainError
+        if isinstance(cause, DomainError):
+            return cause
+        if cause is None:
+            return None
+        cause = cause.__cause__
+    return None
+
+
+class Schema(strawberry.Schema):
+    """A schema that does not log expected failures as if they were bugs.
+
+    Strawberry logs every GraphQL error with a stack trace. A wrong password or
+    an insufficient balance is a documented outcome, not a defect, and the login
+    lock guarantees repeats — tracebacks for those would bury the real errors.
+    Anything without a DomainError behind it keeps its full traceback.
+    """
+
+    def process_errors(
+        self,
+        errors: list[GraphQLError],
+        execution_context: ExecutionContext | None = None,
+    ) -> None:
+        unexpected = []
+        for error in errors:
+            domain_error = _domain_error_behind(error)
+            if domain_error is None:
+                unexpected.append(error)
+            else:
+                logger.info("graphql: rejected with %s: %s", domain_error.code, error.message)
+        if unexpected:
+            super().process_errors(unexpected, execution_context)
+
+
+schema = Schema(query=Query, mutation=Mutation)

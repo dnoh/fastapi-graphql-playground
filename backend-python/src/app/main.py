@@ -13,6 +13,11 @@ from .database.seed import seed_database
 from .database.session import SessionLocal, engine
 from .models.base import Base
 
+logging.basicConfig(
+    level=settings.log_level.upper(),
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -48,6 +53,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Liveness probe. The API surface is GraphQL (see CLAUDE.md); this is the one
+# deliberate exception, because an operational health check must not depend on
+# the GraphQL layer being able to answer. It touches no database.
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
+
 
 # REST API — supplied scaffold alternative, unused by the frontend.
 app.include_router(messages.router, prefix="/api")
