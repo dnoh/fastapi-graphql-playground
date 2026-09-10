@@ -1,8 +1,8 @@
 # Engineering checklist
 
-General, project-agnostic. Used by `/review` (Reviewer 4) and skimmed once by
-`/plan`. Each section starts with an **Applies when** line — if it doesn't apply
-to the change under review, skip the whole section. Domain-specific rules
+General, project-agnostic. Skimmed once by `/plan` and used by `/implement`
+when it reviews its own diff. Each section starts with an **Applies when** line —
+if it doesn't apply to the change, skip the whole section. Domain-specific rules
 (money, healthcare, etc.) belong in the repo's `CLAUDE.md`, not here.
 
 The bar for every item: a concrete miss with a file:line. Not advice.
@@ -13,13 +13,16 @@ Applies when: the change writes to a store.
   only in application code. App validation is the friendly message; the
   constraint is what holds.
 - A multi-step write is one transaction — nothing commits between the steps.
-- Read-then-write on the same row happens in one transaction (no check-then-act
-  race across two).
+- A check-then-act on the same row is protected for the invariant it guards — an
+  atomic conditional `UPDATE … WHERE`, a row lock, a constraint, or an isolation
+  level that actually forbids the race. One transaction alone is **not** enough:
+  under `READ COMMITTED` two transactions both read the old value and both pass.
 - Existing stored data still loads after a schema change (new columns nullable
   or defaulted; no silent reinterpretation of old rows).
 - No floating-point storage or arithmetic for exact quantities (money, counts,
   units). Integers or decimal types.
-- IDs are not guessable where enumeration would leak information.
+- IDs are not guessable where enumeration would leak information — and an
+  unguessable ID is never a substitute for authorization on the object.
 - Deletions: soft-delete vs hard-delete chosen deliberately; cascades explicit.
 
 ## 2. API design
@@ -27,8 +30,10 @@ Applies when: the change adds or modifies an externally callable interface.
 - Inputs are a named type/object, not a growing positional argument list.
 - Errors carry a stable machine-readable code; clients never string-match a
   message.
-- Mutating operations are idempotent where a retry is plausible (network,
-  mobile, queues) — via a client-supplied key with a uniqueness constraint.
+- Every mutating operation has an explicit duplicate/retry strategy where a retry
+  is plausible (network, mobile, queues). A client-supplied key with a uniqueness
+  constraint is the usual answer; natural idempotence or an existing operation
+  identifier can suffice — but the choice is stated, not implied.
 - List endpoints bound their result size (a max page size, cursor or offset).
 - Backward compatible: existing callers keep working; removed fields are
   deprecated first, not deleted.
@@ -39,8 +44,10 @@ Applies when: the change adds or modifies an externally callable interface.
 ## 3. Input validation & injection
 Applies when: the change accepts untrusted input.
 - Validate at the boundary (type, range, length, format); trust nothing past it.
-- Queries are parameterized — never built by string formatting. Same for shell
-  commands, file paths, and templates.
+- Untrusted input never reaches an interpreter by string-building. Each
+  destination has its own mechanism: SQL parameters for queries; argument arrays
+  with no shell for commands; resolution against a fixed base directory for paths;
+  contextual escaping for HTML, URLs, and templates.
 - Output is encoded for its destination (HTML, URL, SQL, shell) — don't rely on
   input sanitization alone.
 - Size limits on request bodies, uploads, list lengths, and string fields.
@@ -75,7 +82,9 @@ Applies when: the change can fail partway through.
 - Partial failure leaves the system consistent (transaction rolled back, no
   half-written state, no orphaned side effects).
 - External calls (HTTP, queue, email) have a timeout and a decision about what
-  happens when they fail — and are not inside a database transaction.
+  happens when they fail — and are not inside a database transaction. Moving them
+  outside leaves a window where the commit succeeds and the delivery is lost: when
+  the contract needs both, use an outbox or a reconciliation step, and say which.
 - Retries have a bound and, where relevant, backoff.
 - Errors don't leak internals (stack traces, SQL, file paths) to clients.
 
@@ -101,15 +110,27 @@ Applies when: always.
 
 ## 9. Configuration & operability
 Applies when: the change introduces something environment-dependent.
-- URLs, credentials, feature flags, and limits come from config/env with a
-  safe default — no literals in code.
+- Environment-dependent values and operational settings — URLs, credentials,
+  feature flags, tunable limits — come from config/env with a safe default.
+  Ordinary constants that never vary by environment can stay in code.
 - A new required config value fails loudly at startup, not on first use.
 - Dev/test defaults can't accidentally be used in production (and vice versa).
 
 ## 10. Scope discipline
 Applies when: always.
-- Nothing in the diff is speculative — every abstraction has a concrete second
-  use today, or it's a plain function.
+- Nothing in the diff is speculative. An abstraction earns its place by a concrete
+  second use today, by isolating a side effect, by enforcing an invariant, or by
+  making a boundary explicit — otherwise it's a plain function.
 - No drive-by refactors or unrelated formatting changes mixed in.
 - Anything deliberately deferred is written down as a non-goal, not silently
   skipped.
+
+## 11. UI states
+Applies when: the change adds or modifies something a person sees or clicks.
+- Loading, empty, and error states each render something deliberate — never a
+  blank region or a raw error object.
+- A submit cannot be repeated by a double-click or an Enter held down: the control
+  disables, or the request is idempotent, or both.
+- Keyboard access: the flow completes without a mouse; focus is visible.
+- Where the feature persists anything, a refresh shows the persisted state, not
+  the pre-submit form.

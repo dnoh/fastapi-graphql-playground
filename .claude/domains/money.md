@@ -5,7 +5,7 @@ payments, refunds, ledgers. Activated by an `@.claude/domains/money.md` line in
 `CLAUDE.md`. Remove that line for features that don't touch money.
 
 These are correctness rules, not style. Each one changes what gets *built*;
-general good practice lives in `.claude/skills/review/checklist.md`.
+general good practice lives in `.claude/skills/implement/checklist.md`.
 
 ## Rules
 
@@ -41,10 +41,13 @@ general good practice lives in `.claude/skills/review/checklist.md`.
 
 ## Deferred by choice — say it, don't build it
 
-- **Row locking** — SQLite serializes writers, so the code is correct here. On
-  Postgres: `SELECT … FOR UPDATE` on the source account, or an optimistic
-  `version` column.
-- **Concurrency test** — a two-thread contention test belongs in CI against Postgres.
+- **Row locking on Postgres** — `SELECT … FOR UPDATE` on the source account, or an
+  optimistic `version` column. On SQLite the conditional `UPDATE` is the guard, but
+  a deferred transaction that reads then writes can fail with `SQLITE_BUSY` instead
+  of waiting — money write paths open with `BEGIN IMMEDIATE`. Not deferred.
+- **Contention test** — a threaded test against the engine in use (SQLite file DB
+  here: N concurrent debits of one account ⇒ no overdraft, sum conserved) runs in
+  the suite. Repeating it against Postgres belongs in CI, and that part is deferred.
 - **Ledger vs. balance column** — know the trade-off, pick the simpler one on purpose.
 - **Multi-currency, FX, rounding on splits** — single currency in the MVP; name it
   as a non-goal.
