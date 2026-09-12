@@ -83,8 +83,11 @@ yarn-error.log*
 # uv
 uv.lock.bak
 
-# docs/ is committed in full: `requirements/` is the plan pipeline's input,
-# `plans/` is its output, and the rest is working notes. Single-author repo.
+# docs/ ships the pipeline's shape, not one feature's content. The blank
+# requirements template is shared; a filled-in ask is yours and stays local,
+# along with the plan and task file generated from it.
+docs/requirements/*
+!docs/requirements/_template.md
 
 # Claude Code: share CLAUDE.md, .claude/settings.json and .claude/skills/;
 # keep per-user local overrides out.
