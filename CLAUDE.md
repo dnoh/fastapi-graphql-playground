@@ -210,8 +210,8 @@ becomes an inferred `I` row in the task file's Traceability table — never a ne
 section in the requirements file.
 
 **Output: two docs per feature, in two folders.** `docs/plans/<slug>.md` is the
-**design doc for the human** — a 3-minute read (≤1100 words, diagrams and SDL
-excluded) with a status/date header: Overview · Goals · Non-goals · Design · Data
+**design doc for the human** — a 3-minute read (≤800 prose words; diagrams, SDL,
+and table rows excluded) with a status/date header: Overview · Goals · Non-goals · Design · Data
 model · API · Alternatives · Cross-cutting · Risks · Delivery. No Open Questions
 section (the doc is not written while one is open). The Data model and API
 sections carry the entity tables, the SDL, and the error codes **with the reason

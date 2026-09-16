@@ -18,7 +18,7 @@ each written once:
 
 | File | Reader | Budget |
 |---|---|---|
-| `docs/plans/<slug>.md` | the human — a **mini design doc** in the Google / Microsoft task-design-review shape | **1100 words, diagrams and SDL blocks excluded** — everything else counts: prose, tables, headers, status line. Per-section guides below sum to ~950. Diagrams and the SDL are free but each must earn its place |
+| `docs/plans/<slug>.md` | the human — a **mini design doc** in the Google / Microsoft task-design-review shape | **800 prose words** — fenced blocks (diagrams, SDL) and table rows are excluded; headers and the status line count. Per-section guides below sum to ~700. Tables are bounded by their own rules (rows, cell length), not by the word count |
 | `docs/impl/<slug>.md` | `/implement` — the task file: traceability, exact contracts, flow steps, step blocks, evidence. The human never reviews it | **~130 lines.** Only what feeds a check or a fresh-context resume |
 
 **The design doc explains; the task file specifies.** Behaviour, goals, trade-offs,
@@ -245,13 +245,13 @@ Status: Draft · Date: <YYYY-MM-DD> · Ask: docs/requirements/<name>.md
                        what breaks without it ("cents, so 0.29 is exactly 29"; "UNIQUE, so a
                        retry cannot post twice"); constraints named. Then the invariant in
                        one sentence, and one sentence on what is denormalised and which test
-                       guards it. ≤60 words of prose; cells ≤8 words
+                       guards it. ≤60 words of prose; why cells ≤12 words, never empty
 ## API                 the GraphQL SDL exactly as it will be exported, in a ```graphql
                        block (free, like diagrams). Then a table Choice | Why for every
                        decision the SDL embodies — the wire type of money, one Input per
                        mutation, an enum where a string would admit garbage, how errors
-                       travel, list limits. Then Code | Raised when for every error code.
-                       ≤150 words outside the block
+                       travel, list limits — 5–8 rows. Then Code | Raised when for every
+                       error code. ≤40 words of prose outside the tables
 ## Alternatives considered   ≤80 words. table: Chosen | Instead of | Trade-off — 3–5 rows, the real
                        reason; no dates. Every answer the user gave in step 2 (identity,
                        funding, wire format, access) is a row, before any implementation trade-off
@@ -293,15 +293,15 @@ There is no Open Questions section: the doc is not written while one is open
 
 Write it to the one-page aim in one pass, in the same response as the task file.
 **Draft to the per-section guides, then measure the total once.** The guides in
-the template sum to about 950 words; write each section to its number as you go,
+the template sum to about 700 prose words; write each section to its number as you go,
 and the first draft lands inside the band without a trim phase. Headers, the
 status line, and table pipes cost about 85 words, which the slack covers. Do not
 draft to the shape of a previous plan.
 
-Then measure once, the total only: `sed '/^```/,/^```/d' FILE | wc -w` for
-the design doc (strips every fenced block: diagrams and SDL), `wc -l FILE` for the task file. Never measure section by section.
-**The numbers are a band, not a target:** a design doc under 1100 words is done and
-must not be trimmed; a task file under 200 lines is done when its entity tables
+Then measure once, the total only: `sed '/^```/,/^```/d' FILE | grep -v '^|' | wc -w`
+for the design doc (strips every fenced block and every table row), `wc -l FILE` for the task file. Never measure section by section.
+**The numbers are a band, not a target:** a design doc under 800 prose words is done
+and must not be trimmed; a task file under 200 lines is done when its entity tables
 and SDL are what fill it. Only above that do you act, and the action is
 **deleting whole items with targeted edits in one pass** — a bullet, an
 Alternatives row, a Risk, starting with the section furthest over its guide —
