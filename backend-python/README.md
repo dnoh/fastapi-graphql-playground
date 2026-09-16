@@ -1,80 +1,19 @@
-# FastAPI GraphQL Playground — Backend
+# backend-python
 
-A FastAPI + Strawberry GraphQL backend over SQLite. GraphQL is the active API; a small
-REST surface is included as an alternative.
+The FastAPI + Strawberry GraphQL service over SQLite. Everything is driven from the
+**repo root** with `make`; there is nothing to run from this folder directly.
 
-## Technologies Used
+| | |
+|---|---|
+| Run | `make backend` (or `make dev` for both servers) → <http://localhost:8080/graphql> |
+| Test | `make test` |
+| Format / lint | `make lint` (rewrites) · `make lint-check` (read-only, what CI runs) |
+| Export SDL | `make schema` |
 
-- FastAPI: Modern, fast web framework for building APIs
-- Strawberry: GraphQL library for Python
-- SQLAlchemy: SQL toolkit and ORM
-- Pydantic: Data validation using Python type annotations
-- Poetry: Dependency management and packaging
-- SQLite: Database (for development)
+Tooling is **uv** (environment and dependencies, `pyproject.toml` + `uv.lock`) and
+**ruff** (format and lint). There is no type checker by design; see "Deliberately not
+included" in the root [README](../README.md), and the conventions and layer rules in
+[CLAUDE.md](../CLAUDE.md).
 
-## Project Structure
-
-```
-backend-python/
-├── src/
-│   └── app/
-│       ├── api/
-│       │   ├── graphql/     # GraphQL schema and resolvers
-│       │   └── rest/        # REST API endpoints
-│       ├── database/        # Database configuration
-│       ├── models/          # SQLAlchemy models
-│       └── schemas/         # Pydantic schemas
-└── tests/                   # Test files
-```
-
-## Setup
-
-1. Install Poetry:
-   ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
-   ```
-
-2. Install dependencies:
-   ```bash
-   poetry install
-   ```
-
-3. Run the development server:
-   ```bash
-   poetry run uvicorn src.app.main:app --reload --port 8080
-   ```
-
-## API Documentation
-
-- REST API documentation: http://localhost:8080/docs
-- GraphQL Playground: http://localhost:8080/graphql
-
-### Example GraphQL Query
-
-```graphql
-query {
-  latestMessages(limit: 10) {
-    id
-    content
-    createdAt
-  }
-}
-```
-
-## Development
-
-- Format code:
-  ```bash
-  poetry run black .
-  poetry run isort .
-  ```
-
-- Type checking:
-  ```bash
-  poetry run mypy .
-  ```
-
-- Run tests:
-  ```bash
-  poetry run pytest
-  ``` 
+`src/app/api/rest/` is left over from the original scaffold. The frontend never calls
+it, and it is not extended.

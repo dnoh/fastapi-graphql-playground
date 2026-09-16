@@ -5,8 +5,21 @@
       "Bash(make *)",
       "Bash(uv run *)",
       "Bash(npm run *)",
+      "Bash(npm test*)",
       "Bash(curl localhost*)",
-      "Bash(sqlite3 *)"
+      "Bash(sqlite3 *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)",
+      "Bash(sed *)",
+      "Bash(wc *)",
+      "Bash(grep *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(lsof *)",
+      "Bash(date*)",
+      "Bash(python3 *)"
     ]
   }
 }

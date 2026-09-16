@@ -45,8 +45,10 @@ CPython 3.12 itself.
 | `make stop` | force-free ports 8080 / 3000 |
 | `make verify` | **run this before you call anything done** — the whole loop, ~5s |
 | `make test` | backend test suite |
+| `make test-fe` | frontend Vitest suite |
 | `make lint` | format + autofix the backend (ruff) — rewrites files, on demand only |
 | `make lint-check` | the same checks read-only, rewriting nothing — what CI runs |
+| `make fmt` | `lint` + frontend Prettier — for files you just wrote, before `verify` |
 | `make check` | frontend ESLint + Prettier + `tsc --noEmit` |
 | `make schema` | export the GraphQL SDL to `frontend/schema.graphql` |
 | `make codegen` | regenerate TS types from the SDL (no running server needed) |

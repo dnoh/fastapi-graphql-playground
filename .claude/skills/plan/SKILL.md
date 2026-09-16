@@ -84,8 +84,8 @@ implementation work. When the rule is met, write the files and stop.
    apply: adopt one only when the ask, an existing repository contract, or a
    correctness property the feature cannot do without supports it. If `CLAUDE.md`
    imports a rules file for the domain, that file is authoritative. An adopted rule
-   the ask never stated becomes an inferred `I` row in Non-functional requirements
-   with its reason, and from there a constraint in the data model, a step in the
+   the ask never stated becomes an inferred `I` row in the task file's Traceability
+   table with its reason, and from there a constraint in the data model, a step in the
    flow, and an `edge` or `invariant` test where it applies. The inference is
    always visible; the domain label is not — the reader sees "a debit may not take
    the balance below zero (I1)", never the word "money". Check both a primary
@@ -201,8 +201,9 @@ implementation work. When the rule is met, write the files and stop.
     (SQLite serialises writers; simulated funding mints money), each with its
     mitigation or the test that guards it. A Risks bullet that a design change
     could delete is a design defect.
-11. **Completion criteria.** An explicit checklist for "the feature is complete",
-    in the design doc.
+11. **Completion criteria.** The Goals' acceptance criteria are the checklist for
+    "the feature is complete"; `/implement` reports against them at the last
+    gate. There is no separate section.
 
 ## The design doc — `docs/plans/<slug>.md`
 

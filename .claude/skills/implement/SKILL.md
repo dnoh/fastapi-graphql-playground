@@ -48,8 +48,8 @@ design doc is still `Draft`. Each is a question for the user, not a guess.
 
 ## The loop — once per step; ask at the end of each checkpoint
 
-1. **Read state.** The design doc's Behaviour and its status line — if it still
-   says `Draft`, say so and ask whether to proceed, because the human has not
+1. **Read state.** The design doc's Overview and Goals, and its status line — if
+   it still says `Draft`, say so and ask whether to proceed, because the human has not
    approved the design you are about to build. The task file's Contracts section
    and this step's block only. Then the current code the block names.
 2. **Announce, then go.** In ≤5 lines: files touched, what changes, what tests
@@ -103,20 +103,24 @@ design doc is still `Draft`. Each is a question for the user, not a guess.
 9. **Persist evidence, then mark.** Write **five lines** into the step's
    Evidence field in the task file: verification result and test count · live
    checks passed · fixes applied (review or contract) · not covered · size vs
-   plan. Not a copy of the report. Then flip `[ ]` to `[x]` there and set its
-   Status in the design doc's Milestones table. Evidence first, mark second — a
-   fresh context must never see "done" without the proof beside it.
-10. **Report.** Under ~20 lines, in the format below. The report is for the
-    human at the gate; the Evidence field is for the next context.
-11. **Ask — only at the end of a checkpoint.** If this step is not the last in its
-    checkpoint: announce the next step in one line and return to step 1 without
-    asking. If it is: via **AskUserQuestion**, exactly one question — continue to
-    the next checkpoint, stop here, or reopen this one. Never proceed past a
-    checkpoint without an answer. The user reviews the report and walks the
-    manual tests before answering; that is the point of the gate. On "continue",
-    write `Accepted <date>` beside the checkpoint heading and return to step 1.
-    When the last checkpoint is accepted, report against the Definition of Done
-    and stop.
+   plan. Not a copy of the report. Then flip `[ ]` to `[x]` there; when it is the
+   checkpoint's last step, set that checkpoint's Status in the design doc's
+   Delivery table. Evidence first, mark second — a fresh context must never see
+   "done" without the proof beside it.
+10. **Report — only at the end of a checkpoint.** If this step is not the last
+    in its checkpoint: no report; announce the next step in one line and return
+    to step 1. If it is: under ~20 lines, in the format below, covering every
+    step in the checkpoint — one combined Tests table and the manual flows for
+    the whole slice. The report is for the human at the gate; the Evidence field
+    is for the next context.
+11. **Ask — only at the end of a checkpoint.** After the report, via
+    **AskUserQuestion**, exactly one question — continue to the next checkpoint,
+    stop here, or reopen this one. Never proceed past a checkpoint without an
+    answer. The user reviews the report and walks the manual tests before
+    answering; that is the point of the gate. On "continue", write
+    `Accepted <date>` beside the checkpoint heading and return to step 1. When
+    the last checkpoint is accepted, report against the Goals' acceptance
+    criteria in the design doc and stop.
 
     The docs hold all state, so the user may stop and resume in a fresh context at
     any gate. Recommend that only when it helps: after a long investigation,
@@ -155,7 +159,7 @@ unknown number"), not rows.
 bullet each, so the user knows exactly what they are trusting. Rows marked ⬜
 above are pending human acceptance; list them here too.
 
-Then at most 3 bullets: contract changes approved this milestone (and equivalent
+Then at most 3 bullets: contract changes approved this checkpoint (and equivalent
 implementation choices noted), review findings left open, and the change size if
 it overran the estimate. Nothing else.
 

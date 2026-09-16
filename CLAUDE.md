@@ -194,8 +194,8 @@ the *scaffold*, not a rule for features. When planning a feature:
 
 ## Workflow skills
 
-`/plan <requirements-file>` → `/implement <design-doc>`, which loops milestone by
-milestone and asks before each next one.
+`/plan <requirements-file>` → `/implement <design-doc>`, which builds one
+checkpoint at a time and asks before each next one.
 
 The skills are project-agnostic and reusable; **this file is the only place that
 knows the stack, and `.claude/domains/` is the only place that knows the domain.**
@@ -204,29 +204,34 @@ conventions for layer rules.
 
 **Input:** `docs/requirements/<name>.md` — a title plus the verbatim ask as one
 numbered list, nothing else; start from `_template.md`. Your decisions become
-Alternatives rows in the plan, your questions are resolved in its ambiguity step,
-and a rule the prompt forgot (overdraw, precision, idempotency) becomes an inferred
-`I` row under Non-functional requirements — never a new section in the requirements
-file.
+Alternatives rows in the design doc, your questions are resolved in `/plan`'s
+ambiguity step, and a rule the prompt forgot (overdraw, precision, idempotency)
+becomes an inferred `I` row in the task file's Traceability table — never a new
+section in the requirements file.
 
 **Output: two docs per feature, in two folders.** `docs/plans/<slug>.md` is the
-**design doc for the human** — a 2-minute read (≤120 lines, ≤350 prose words) with a
-status/date header: Goal + Context · Requirements · Cross-cutting · Proposed Design ·
-Milestones · Risks · Open Questions · Definition of Done. It is the only thing the human reviews. `docs/impl/<slug>.md` is the
-**task file for the agent** — the flow steps, each milestone's files, contract
-changes, test table, verification commands, and a `[ ]` with five lines of
-evidence that `/implement` fills; about 80 lines, written and read in silence,
-never linked from the design doc. Same file name in both folders. Contracts live
-only in the design doc; the task file points at them. Budgets, as guidance: about
-five minutes to plan, about two to implement a ≤300-line milestone.
+**design doc for the human** — a 2-minute read (≤800 words, diagrams excluded) with
+a status/date header: Overview · Goals · Non-goals · Design · Alternatives ·
+Cross-cutting · Risks · Delivery. No Open Questions section (the doc is not written
+while one is open) and no SDL, SQL, or error tables (it explains; the task file
+specifies). It is the only thing the human reviews. `docs/impl/<slug>.md` is the
+**task file for the agent** — Traceability, the Contracts (entity tables, the SDL,
+error codes, limits), the flow steps, and an Implementation Plan of `## Checkpoint N`
+headings holding `### Step N.M — [ ]` blocks (Owns, Parallel with, Tests,
+Verification, and an Evidence field of five lines that `/implement` fills); about
+130 lines, written and read in silence, never linked from the design doc. Same file
+name in both folders. Contracts live in the task file; the design doc explains them.
+Budgets, as guidance: about five minutes to plan, about two to implement a ≤300-line
+step.
 
-**`/implement`** runs one milestone at a time: implement → test → inspect →
-compare against the docs → review the diff with `checklist.md` → report (tests
-table, manual test instructions, and what is *not* covered) → mark the milestone
-done in both docs → **ask** whether to continue. It never proceeds without an
-answer, and never commits; shipping happens outside the loop. Add "propose first"
-to gate before any code is written. Milestones are planned at ≤400 changed lines
-and implemented with a ceiling of ~500; generated files don't count.
+**`/implement`** builds every step of a checkpoint in one pass: implement → test →
+inspect → compare against the docs → review the diff with `checklist.md` → record
+Evidence and mark each step → one report at the checkpoint gate (tests table, manual
+test instructions, and what is *not* covered) → **ask** whether to continue. It never
+proceeds past a gate without an answer, and never commits; shipping happens outside
+the loop. Add "propose first" to gate before any code is written. A checkpoint is a
+vertical slice — API *and* UI — that demos on its own. Steps are planned at ≤300
+changed lines and implemented with a ceiling of ~500; generated files don't count.
 
 **Model per phase.** Skills cannot pin a model, so switch with `/model` between
 phases: Fable for `/plan` (fast, and a plan is cheap to redo), Opus for
