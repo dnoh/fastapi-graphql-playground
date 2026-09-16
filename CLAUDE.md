@@ -210,17 +210,20 @@ becomes an inferred `I` row in the task file's Traceability table — never a ne
 section in the requirements file.
 
 **Output: two docs per feature, in two folders.** `docs/plans/<slug>.md` is the
-**design doc for the human** — a 2-minute read (≤800 words, diagrams excluded) with
-a status/date header: Overview · Goals · Non-goals · Design · Alternatives ·
-Cross-cutting · Risks · Delivery. No Open Questions section (the doc is not written
-while one is open) and no SDL, SQL, or error tables (it explains; the task file
-specifies). It is the only thing the human reviews. `docs/impl/<slug>.md` is the
+**design doc for the human** — a 3-minute read (≤1100 words, diagrams and SDL
+excluded) with a status/date header: Overview · Goals · Non-goals · Design · Data
+model · API · Alternatives · Cross-cutting · Risks · Delivery. No Open Questions
+section (the doc is not written while one is open). The Data model and API
+sections carry the entity tables, the SDL, and the error codes **with the reason
+beside each choice** — a reviewer judges those two sections first. It is the only
+thing the human reviews. `docs/impl/<slug>.md` is the
 **task file for the agent** — Traceability, the Contracts (entity tables, the SDL,
 error codes, limits), the flow steps, and an Implementation Plan of `## Checkpoint N`
 headings holding `### Step N.M — [ ]` blocks (Owns, Parallel with, Tests,
 Verification, and an Evidence field of five lines that `/implement` fills); about
 130 lines, written and read in silence, never linked from the design doc. Same file
-name in both folders. Contracts live in the task file; the design doc explains them.
+name in both folders. The entity tables and the SDL appear in both, verbatim: the
+design doc with reasons, the task file without, so each reader opens one file.
 Budgets, as guidance: about five minutes to plan, about two to implement a ≤300-line
 step.
 

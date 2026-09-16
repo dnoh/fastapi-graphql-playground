@@ -18,13 +18,16 @@ each written once:
 
 | File | Reader | Budget |
 |---|---|---|
-| `docs/plans/<slug>.md` | the human — a **mini design doc** in the Google / Microsoft task-design-review shape | **800 words, diagrams excluded** — everything else counts: prose, tables, headers, status line. Per-section guides below sum to ~700. Diagrams are free but each must earn its place |
+| `docs/plans/<slug>.md` | the human — a **mini design doc** in the Google / Microsoft task-design-review shape | **1100 words, diagrams and SDL blocks excluded** — everything else counts: prose, tables, headers, status line. Per-section guides below sum to ~950. Diagrams and the SDL are free but each must earn its place |
 | `docs/impl/<slug>.md` | `/implement` — the task file: traceability, exact contracts, flow steps, step blocks, evidence. The human never reviews it | **~130 lines.** Only what feeds a check or a fresh-context resume |
 
 **The design doc explains; the task file specifies.** Behaviour, goals, trade-offs,
-and risks live in the design doc in plain sentences. Requirement traceability,
-schemas, SDL, error codes, SQL, limits, and tests live in the task file. Neither
-restates the other. A design doc is not an implementation manual: if it mostly
+risks, the data model, and the API live in the design doc — the model and the API
+each with the *reason* beside every choice, because a reviewer judges those two
+sections above all others. Requirement traceability, flows, limits, steps, and
+tests live in the task file, which also repeats the entity tables and the SDL
+verbatim so an implementer reads one file. That duplication is deliberate and
+exact: the SDL is copied, never paraphrased, and the task file adds no reasons. A design doc is not an implementation manual: if it mostly
 says *how* without *why* and *what else was considered*, it has failed. The task
 file may elaborate a design-doc decision; it may never introduce behaviour the
 design doc does not show. Once approved, both are what `/implement` builds to; a
@@ -236,8 +239,19 @@ Status: Draft · Date: <YYYY-MM-DD> · Ask: docs/requirements/<name>.md
                        and correctness": every failure behaviour and guarantee, one sentence
                        each — always including the client contract (one key per intent, reused
                        after a timeout) and the conservation statement. Branching, conflict recovery, and tests stay in the task file.
-                       No schemas, no SDL, no SQL, no column lists, no error-code tables,
-                       no file inventory.
+                       No SDL, SQL, or column lists here — they live in the two sections
+                       below. No file inventory.
+## Data model          one table per entity — column | type | why — the why a clause naming
+                       what breaks without it ("cents, so 0.29 is exactly 29"; "UNIQUE, so a
+                       retry cannot post twice"); constraints named. Then the invariant in
+                       one sentence, and one sentence on what is denormalised and which test
+                       guards it. ≤60 words of prose; cells ≤8 words
+## API                 the GraphQL SDL exactly as it will be exported, in a ```graphql
+                       block (free, like diagrams). Then a table Choice | Why for every
+                       decision the SDL embodies — the wire type of money, one Input per
+                       mutation, an enum where a string would admit garbage, how errors
+                       travel, list limits. Then Code | Raised when for every error code.
+                       ≤150 words outside the block
 ## Alternatives considered   ≤80 words. table: Chosen | Instead of | Trade-off — 3–5 rows, the real
                        reason; no dates. Every answer the user gave in step 2 (identity,
                        funding, wire format, access) is a row, before any implementation trade-off
@@ -279,22 +293,22 @@ There is no Open Questions section: the doc is not written while one is open
 
 Write it to the one-page aim in one pass, in the same response as the task file.
 **Draft to the per-section guides, then measure the total once.** The guides in
-the template sum to about 700 words; write each section to its number as you go,
+the template sum to about 950 words; write each section to its number as you go,
 and the first draft lands inside the band without a trim phase. Headers, the
 status line, and table pipes cost about 85 words, which the slack covers. Do not
 draft to the shape of a previous plan.
 
-Then measure once, the total only: `sed '/^```mermaid/,/^```/d' FILE | wc -w` for
-the design doc, `wc -l FILE` for the task file. Never measure section by section.
-**The numbers are a band, not a target:** a design doc under 800 words is done and
+Then measure once, the total only: `sed '/^```/,/^```/d' FILE | wc -w` for
+the design doc (strips every fenced block: diagrams and SDL), `wc -l FILE` for the task file. Never measure section by section.
+**The numbers are a band, not a target:** a design doc under 1100 words is done and
 must not be trimmed; a task file under 200 lines is done when its entity tables
 and SDL are what fill it. Only above that do you act, and the action is
 **deleting whole items with targeted edits in one pass** — a bullet, an
 Alternatives row, a Risk, starting with the section furthest over its guide —
 never shortening sentences (40 words a pass) and never re-emitting the whole
 file (a minute per pass, and the diagrams come out identical). Never delete a
-diagram, a user decision, the client retry contract, the conservation statement,
-or the token-storage risk when a token exists. One measure after the edits, then
+diagram, the SDL, an entity table, a user decision, the client retry contract,
+the conservation statement, or the token-storage risk when a token exists. One measure after the edits, then
 stop.
 
 The status line flips to `Approved` when the user accepts the doc; `/implement`
@@ -315,8 +329,8 @@ numbered ask item and every inferred I-row with its one-clause why; consolidated
 several items; nothing from the ask is absent
 
 # Contracts
-entities — one table each: column | type | constraints (named CHECK / UNIQUE / FK), + the invariant
-API — the GraphQL SDL block, exactly as it will be exported
+entities — one table each: column | type | constraints (named CHECK / UNIQUE / FK), + the invariant — same rows as the design doc's Data model, minus the why column
+API — the GraphQL SDL block, byte-identical to the design doc's API section
 errors — table: Code | Raised when
 limits — the constants (caps, ceilings, TTLs, page sizes) with their values
 
@@ -373,9 +387,10 @@ bar, not length — a block that makes the implementer re-derive a decision has 
 
 - **The design-doc budget is the rule everything else serves.** Over a cap means
   cut; never append a note apologising for length.
-- Say each thing once. The ask lives in the requirements file: reference it, never
-  restate it. Explanation lives in the design doc, specification in the task file;
-  neither copies the other. Rationale is a clause, not a paragraph — and a reason,
+- Say each thing once, with one exception. The ask lives in the requirements
+  file: reference it, never restate it. Reasons live only in the design doc. The
+  entity tables and the SDL appear in both files, verbatim, so that the reviewer
+  and the implementer each read one file. Rationale is a clause, not a paragraph — and a reason,
   not a date.
 - Contracts, not choreography. Minimal design; speculative generality is a rejected
   Alternative.
